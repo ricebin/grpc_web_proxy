@@ -11,8 +11,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"github.com/mwitkow/grpc-proxy/proxy"
+	"github.com/ricebin/grpc_web_proxy/grpcproxy"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
@@ -39,15 +39,10 @@ func main() {
 
 	grpcServer := buildGrpcProxyServer(backendConn, codec)
 
-	options := []grpcweb.Option{
-		grpcweb.WithCorsForRegisteredEndpointsOnly(false),
-		grpcweb.WithOriginFunc(makeHttpOriginFunc()),
-	}
-
-	wrappedGrpc := grpcweb.WrapServer(grpcServer, options...)
+	wrappedGrpc := grpcproxy.WrapServer(grpcServer)
 
 	serveMux := http.NewServeMux()
-	serveMux.Handle("/", wrappedGrpc)
+	serveMux.Handle("/", cors(wrappedGrpc))
 
 	hs := &http.Server{
 		Handler: serveMux,
@@ -66,7 +61,7 @@ func main() {
 }
 
 func buildGrpcProxyServer(backendConn *grpc.ClientConn, codec grpc.Codec) *grpc.Server {
-	// gRPC proxy logic.
+	//gRPC proxy logic.
 	director := func(ctx context.Context, fullMethodName string) (context.Context, *grpc.ClientConn, error) {
 		md, _ := metadata.FromIncomingContext(ctx)
 		mdCopy := md.Copy()
@@ -83,12 +78,6 @@ func buildGrpcProxyServer(backendConn *grpc.ClientConn, codec grpc.Codec) *grpc.
 		grpc.CustomCodec(codec), // needed for proxy to function.
 		grpc.UnknownServiceHandler(proxy.TransparentHandler(director)),
 	)
-}
-
-func makeHttpOriginFunc() func(origin string) bool {
-	return func(origin string) bool {
-		return true
-	}
 }
 
 func dialBackendOrFail(host string, codec grpc.Codec) *grpc.ClientConn {
@@ -124,4 +113,24 @@ func NewConnOpts(host string) ([]grpc.DialOption, error) {
 	}
 
 	return opts, nil
+}
+
+func allowedOrigin(_ string) bool {
+	return true
+}
+
+func cors(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if allowedOrigin(r.Header.Get("Origin")) {
+			w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE")
+			w.Header().
+				Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, ResponseType, Content-Type, X-Grpc-Web, X-User-Agent")
+		}
+		if r.Method == "OPTIONS" {
+			w.Header().Set("Access-Control-Max-Age", "7200")
+			return
+		}
+		h.ServeHTTP(w, r)
+	})
 }
