@@ -5,7 +5,7 @@ go 1.21.0
 require (
 	github.com/improbable-eng/grpc-web v0.15.0
 	github.com/mwitkow/grpc-proxy v0.0.0-20230212185441-f345521cb9c9
-	google.golang.org/grpc v1.58.2
+	google.golang.org/grpc v1.58.3
 )
 
 require (
