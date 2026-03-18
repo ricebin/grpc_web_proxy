@@ -1,24 +1,24 @@
 module github.com/ricebin/grpc_web_proxy
 
-go 1.21.0
+go 1.24.0
+
 toolchain go1.24.1
 
 require (
 	github.com/improbable-eng/grpc-web v0.15.0
 	github.com/mwitkow/grpc-proxy v0.0.0-20230212185441-f345521cb9c9
-	google.golang.org/grpc v1.58.3
+	google.golang.org/grpc v1.79.3
 )
 
 require (
 	github.com/cenkalti/backoff/v4 v4.1.1 // indirect
 	github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f // indirect
-	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/klauspost/compress v1.11.7 // indirect
 	github.com/rs/cors v1.7.0 // indirect
-	golang.org/x/net v0.38.0 // indirect
-	golang.org/x/sys v0.31.0 // indirect
-	golang.org/x/text v0.23.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98 // indirect
-	google.golang.org/protobuf v1.33.0 // indirect
+	golang.org/x/net v0.48.0 // indirect
+	golang.org/x/sys v0.39.0 // indirect
+	golang.org/x/text v0.32.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20251202230838-ff82c1b0f217 // indirect
+	google.golang.org/protobuf v1.36.10 // indirect
 	nhooyr.io/websocket v1.8.6 // indirect
 )
